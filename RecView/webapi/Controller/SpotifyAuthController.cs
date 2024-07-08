@@ -16,11 +16,11 @@ namespace webapi.Controller
     public class SpotifyAuthController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        SpotifyUserService _userService;
-        public SpotifyAuthController(IHttpClientFactory httpClientFactory, UserService service)
+        SpotifyUserService service;
+        public SpotifyAuthController(IHttpClientFactory httpClientFactory, SpotifyUserService spotifyUserService)
         {
             _httpClientFactory = httpClientFactory;
-            _userService = service;
+            service = spotifyUserService;
         }
 
         [HttpGet("login")]
@@ -54,10 +54,10 @@ namespace webapi.Controller
             };
 
             // Здесь вы можете добавить логику сохранения или обновления пользователя в вашей базе данных
-            var user = await _userService.Add(newuser);
+            var user = await service.Add(newuser);
             // или создания JWT токена и отправки его клиенту
 
-            return Ok(new { SpotifyId = spotifyId, UserName = userName });
+            return Ok(user);
         }
 
         private async Task<SpotifyUser> GetSpotifyUserInfoAsync(string accessToken)

@@ -9,6 +9,6 @@
         public string Description { get; set; }
         public DateTime ReleaseDate { get; set; }
         public List<Song> Songs { get; set; }
-        public List<UserOverview> UserOverviews { get; set; }
+        public List<UserOverview>? UserOverviews { get; set; }
     }
 }

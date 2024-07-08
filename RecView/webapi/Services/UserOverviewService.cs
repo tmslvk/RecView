@@ -23,7 +23,7 @@ namespace webapi.Services
                 Title = userOverviewDTO.Title,
                 UserId = userOverviewDTO.UserId,
                 AlbumId = userOverviewDTO.AlbumId,
-                Album = userOverviewDTO.Album,
+                OverviewedAlbum = userOverviewDTO.Album,
             };
 
             await db.AddAsync(userOverview);
@@ -49,7 +49,7 @@ namespace webapi.Services
 
         public async Task<List<UserOverview>?> GetByArtist(int artistId)
         {
-            return await db.UserOverviews.Where(uo => uo.Album.ArtistId == artistId).ToListAsync();
+            return await db.UserOverviews.Where(uo => uo.OverviewedAlbum.ArtistId == artistId).ToListAsync();
         }
     }
 }

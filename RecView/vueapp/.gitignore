@@ -16,6 +16,9 @@ coverage
 
 /cypress/videos/
 /cypress/screenshots/
+/appsettings.json
+/appsettings.Development.json
+/appsettings.Production.json
 
 # Editor directories and files
 .vscode/*

@@ -15,6 +15,7 @@ namespace webapi
         public DbSet<Song> Songs { get; set; } = null!;
         public DbSet<UserOverview> UserOverviews { get; set; } = null!;
         public DbSet<Like> Likes { get; set; } = null!;
+        public DbSet<SpotifyUser> SpotifyUsers { get; set; }
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
             Database.EnsureCreated();
@@ -47,9 +48,9 @@ namespace webapi
 
             //UserOverview-Album one-to-many
             modelBuilder.Entity<UserOverview>()
-                .HasOne(uo => uo.Album)
+                .HasOne(uo => uo.OverviewedAlbum)
                 .WithMany(a => a.UserOverviews)
-                .HasForeignKey(uo => uo.Album);
+                .HasForeignKey(uo => uo.AlbumId);
 
             //Like
             modelBuilder.Entity<Like>()

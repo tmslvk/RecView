@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Authentication.Certificate;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using webapi;
 using webapi.Models;
@@ -48,9 +52,36 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
             ValidateIssuerSigningKey = true,
         };
+    })
+    .AddOAuth("Spotify", options =>
+    {
+        options.ClientId = builder.Configuration.GetConnectionString("CLIENT_ID");
+        options.ClientSecret = builder.Configuration.GetConnectionString("CLIENT_SECRET");
+        options.CallbackPath = "/signin-spotify";
+        options.AuthorizationEndpoint = "https://accounts.spotify.com/authorize";
+        options.TokenEndpoint = "https://accounts.spotify.com/api/token";
+        options.Scope.Add("user-read-email");
+        options.Events = new OAuthEvents
+        {
+            OnCreatingTicket = async context =>
+            {
+                // Получение дополнительной информации о пользователе
+                var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+
+                var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+                response.EnsureSuccessStatusCode();
+
+                var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+
+                context.RunClaimActions(user.RootElement);
+            }
+        };
     });
-
-
+builder.Services.AddHttpClient("Spotify", client =>
+{
+    client.BaseAddress = new Uri("https://api.spotify.com/");
+});
 var app = builder.Build();
 app.UseRouting();
 app.UseCors(options =>

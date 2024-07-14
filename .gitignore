@@ -3,3 +3,8 @@
 ################################################################################
 
 /RecView/webapi/appsettings.json
+
+bin/
+obj/
+*.user
+appsettings.json

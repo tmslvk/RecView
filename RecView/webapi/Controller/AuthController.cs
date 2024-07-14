@@ -114,45 +114,5 @@ namespace webapi.Controller
             return jwt;
         }
         #endregion
-
-        #region[SpotifyEntry]
-        [HttpGet("login-spotify")]
-        public IActionResult Login(string returnUrl = "/")
-        {
-            var redirectUrl = Url.Action(nameof(Callback), "Auth", new { returnUrl });
-            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-            return Challenge(properties, "Spotify");
-        }
-
-        [HttpGet("callback")]
-        public async Task<IActionResult> Callback(string returnUrl = "/")
-        {
-            var authenticateResult = await HttpContext.AuthenticateAsync();
-
-            // Проверка успешной аутентификации пользователя
-
-            if (authenticateResult.Succeeded)
-            {
-                var tokenString = GenerateJwtToken(authenticateResult.Principal);
-                return Redirect($"{returnUrl}?token={tokenString}");
-            }
-
-            return RedirectToAction("login-spotify");
-        }
-
-        private string GenerateJwtToken(ClaimsPrincipal principal)
-        {
-            var creds = new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                AuthOptions.ISSUER,
-                AuthOptions.ISSUER,
-                claims: principal.Claims,
-                expires: DateTime.Now.AddMinutes(30), // Время жизни токена
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-        #endregion
     }
 }

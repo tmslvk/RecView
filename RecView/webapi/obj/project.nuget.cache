@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Cz1RIkYlJLqt23uMvg/+14UXlMsjM+Vd3LSv3peNQ63djqYm4iY3bjR3yyUMkovsboOBuklWCbiynLan8L/s7Q==",
+  "dgSpecHash": "UnhVEvmdu5eFBHd6nesVyUY6YsY7HevaDdzpwfGnYG0HvtM97yKReobts/VgFGcjfD2WREj021NwWOaRLZVawQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\Тима\\source\\repos\\RecView\\RecView\\webapi\\webapi.csproj",
   "expectedPackageFiles": [
@@ -48,6 +48,7 @@
     "C:\\Users\\Тима\\.nuget\\packages\\nettopologysuite.io.sqlserverbytes\\2.1.0\\nettopologysuite.io.sqlserverbytes.2.1.0.nupkg.sha512",
     "C:\\Users\\Тима\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\Тима\\.nuget\\packages\\owin\\1.0.0\\owin.1.0.0.nupkg.sha512",
+    "C:\\Users\\Тима\\.nuget\\packages\\restsharp\\111.4.0\\restsharp.111.4.0.nupkg.sha512",
     "C:\\Users\\Тима\\.nuget\\packages\\spotifyapi.web\\7.1.1\\spotifyapi.web.7.1.1.nupkg.sha512",
     "C:\\Users\\Тима\\.nuget\\packages\\spotifyapi.web.auth\\7.1.1\\spotifyapi.web.auth.7.1.1.nupkg.sha512",
     "C:\\Users\\Тима\\.nuget\\packages\\swashbuckle.aspnetcore\\6.4.0\\swashbuckle.aspnetcore.6.4.0.nupkg.sha512",

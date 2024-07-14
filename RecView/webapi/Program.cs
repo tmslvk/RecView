@@ -36,45 +36,61 @@ builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<LikeService>();
 builder.Services.AddTransient<UserOverviewService>();
 builder.Services.AddTransient<PublicationService>();
+builder.Services.AddTransient<SpotifyUserService>();
 builder.Services.AddAuthentication(
         CertificateAuthenticationDefaults.AuthenticationScheme)
         .AddCertificate();
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-        {
+//through server
+builder.Services.AddAuthentication("ApplicationJwtBearer")
+    .AddJwtBearer("ApplicationJwtBearer", options =>
+    {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = AuthOptions.ISSUER,
+            ValidIssuer = builder.Configuration["JWT:ISSUER"],
             ValidateAudience = true,
-            ValidAudience = AuthOptions.AUDIENCE,
+            ValidAudience = builder.Configuration["JWT:AUDIENCE"],
             ValidateLifetime = true,
-            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SECRET_KEY"])),
             ValidateIssuerSigningKey = true,
+        };
+    });
+
+//through spotify
+builder.Services.AddAuthentication("SpotifyJwtBearer")
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+    {
+        // Конфигурация JWT Bearer
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["JWT:ISSUER"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["JWT:AUDIENCE"],
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SECRET_KEY"]))
         };
     })
     .AddOAuth("Spotify", options =>
     {
-        options.ClientId = builder.Configuration.GetConnectionString("CLIENT_ID");
-        options.ClientSecret = builder.Configuration.GetConnectionString("CLIENT_SECRET");
-        options.CallbackPath = "/signin-spotify";
+        options.ClientId = builder.Configuration["Spotify:CLIENT_ID"];
+        options.ClientSecret = builder.Configuration["Spotify:CLIENT_SECRET"];
+        options.CallbackPath = "/signin-spotify"; // Путь, на который Spotify отправит ответ после аутентификации
         options.AuthorizationEndpoint = "https://accounts.spotify.com/authorize";
         options.TokenEndpoint = "https://accounts.spotify.com/api/token";
-        options.Scope.Add("user-read-email");
+
+        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "display_name");
+        options.ClaimActions.MapJsonKey("urn:spotify:country", "country");
+
         options.Events = new OAuthEvents
         {
-            OnCreatingTicket = async context =>
+            OnCreatingTicket = context =>
             {
-                // Получение дополнительной информации о пользователе
-                var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-
-                var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                response.EnsureSuccessStatusCode();
-
-                var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-
-                context.RunClaimActions(user.RootElement);
+                var accessToken = context.AccessToken;
+                // Дополнительная обработка токена, если необходимо
+                return Task.CompletedTask;
             }
         };
     });

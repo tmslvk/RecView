@@ -1,4 +1,3 @@
-C:\Users\Тима\source\repos\RecView\RecView\webapi\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\Тима\source\repos\RecView\RecView\webapi\bin\Debug\net8.0\appsettings.json
 C:\Users\Тима\source\repos\RecView\RecView\webapi\bin\Debug\net8.0\webapi.exe
 C:\Users\Тима\source\repos\RecView\RecView\webapi\bin\Debug\net8.0\webapi.deps.json
@@ -96,3 +95,4 @@ C:\Users\Тима\source\repos\RecView\RecView\webapi\obj\Debug\net8.0\refint\we
 C:\Users\Тима\source\repos\RecView\RecView\webapi\obj\Debug\net8.0\webapi.pdb
 C:\Users\Тима\source\repos\RecView\RecView\webapi\obj\Debug\net8.0\webapi.genruntimeconfig.cache
 C:\Users\Тима\source\repos\RecView\RecView\webapi\obj\Debug\net8.0\ref\webapi.dll
+C:\Users\Тима\source\repos\RecView\RecView\webapi\bin\Debug\net8.0\RestSharp.dll

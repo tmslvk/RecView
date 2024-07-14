@@ -775,6 +775,19 @@
           "lib/net40/Owin.dll": {}
         }
       },
+      "RestSharp/111.4.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/RestSharp.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/RestSharp.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "SpotifyAPI.Web/7.1.1": {
         "type": "package",
         "dependencies": {
@@ -2431,6 +2444,31 @@
         "owin.nuspec"
       ]
     },
+    "RestSharp/111.4.0": {
+      "sha512": "GcOIOyYYFm3oCFHbGBwGtDawC9yqvv6m7Ixyt+qeI+/UrPNyCJK31VOPRfEgj5M+3AfigSP6a8jZyFtBZxouTA==",
+      "type": "package",
+      "path": "restsharp/111.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net471/RestSharp.dll",
+        "lib/net471/RestSharp.xml",
+        "lib/net48/RestSharp.dll",
+        "lib/net48/RestSharp.xml",
+        "lib/net6.0/RestSharp.dll",
+        "lib/net6.0/RestSharp.xml",
+        "lib/net7.0/RestSharp.dll",
+        "lib/net7.0/RestSharp.xml",
+        "lib/net8.0/RestSharp.dll",
+        "lib/net8.0/RestSharp.xml",
+        "lib/netstandard2.0/RestSharp.dll",
+        "lib/netstandard2.0/RestSharp.xml",
+        "restsharp.111.4.0.nupkg.sha512",
+        "restsharp.nuspec",
+        "restsharp.png"
+      ]
+    },
     "SpotifyAPI.Web/7.1.1": {
       "sha512": "xMgjZkBqVlZNZ/hROhx5XsKEWQtxRmFTZs5mv6Z9w+fwzBnCR1EFSwTcdpKNiVx/Pa+9p7PJO0q1Cb+fOkQq6Q==",
       "type": "package",
@@ -3161,6 +3199,7 @@
       "Microsoft.EntityFrameworkCore >= 9.0.0-preview.5.24306.3",
       "Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite >= 9.0.0-preview.5.24306.3",
       "Microsoft.Owin.Security.OAuth >= 4.2.2",
+      "RestSharp >= 111.4.0",
       "SpotifyAPI.Web >= 7.1.1",
       "SpotifyAPI.Web.Auth >= 7.1.1",
       "Swashbuckle.AspNetCore >= 6.4.0"
@@ -3241,6 +3280,10 @@
           "Microsoft.Owin.Security.OAuth": {
             "target": "Package",
             "version": "[4.2.2, )"
+          },
+          "RestSharp": {
+            "target": "Package",
+            "version": "[111.4.0, )"
           },
           "SpotifyAPI.Web": {
             "target": "Package",

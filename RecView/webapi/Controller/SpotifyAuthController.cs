@@ -1,12 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using RestSharp;
+using SpotifyAPI.Web;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using webapi.DTO;
 using webapi.Model;
+using webapi.Models;
 using webapi.Services;
 
 namespace webapi.Controller
@@ -15,61 +23,137 @@ namespace webapi.Controller
     [ApiController]
     public class SpotifyAuthController : ControllerBase
     {
-        private readonly IHttpClientFactory _httpClientFactory;
         SpotifyUserService service;
-        public SpotifyAuthController(IHttpClientFactory httpClientFactory, SpotifyUserService spotifyUserService)
+        IConfiguration config;
+        public SpotifyAuthController (SpotifyUserService spotifyUserService, IConfiguration configuration)
         {
-            _httpClientFactory = httpClientFactory;
             service = spotifyUserService;
+            config = configuration;
         }
 
         [HttpGet("login")]
         public IActionResult Login()
         {
-            var redirectUrl = Url.Action(nameof(HandleSpotifyResponse), "SpotifyAuth", null, Request.Scheme);
-            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-            return Challenge(properties, "Spotify");
+            // Redirect the user to Spotify's authorization page
+            var scopes = new List<string> { 
+                "user-read-private", 
+                "user-read-email", 
+                //"user-follow-read",
+                //"user-read-recently-played",  
+                //"user-top-read",
+            };
+            var authorizeUrl = $"https://accounts.spotify.com/authorize" +
+                $"?client_id={config["Spotify:CLIENT_ID"]}" +
+                $"&response_type=code" +
+                $"&redirect_uri={Uri.EscapeDataString(config["Spotify:REDIRECT_URI"])}" +
+                $"&scope={Uri.EscapeDataString(string.Join(" ", scopes))}";
+
+            return Redirect(authorizeUrl);
         }
 
-        [HttpGet("handle-spotify-response")]
-        public async Task<IActionResult> HandleSpotifyResponse()
+        [HttpGet("callback")]
+        public async Task<IActionResult> Callback(string code)
         {
-            var authenticateResult = await HttpContext.AuthenticateAsync("Spotify");
-
-            if (!authenticateResult.Succeeded)
+            // Exchange the authorization code for an access token
+            var token = await ExchangeCodeForToken(code);
+            if (token == null)
             {
-                return BadRequest("Authentication failed.");
+                return BadRequest("Unable to retrieve access token.");
             }
 
-            // Получение информации о пользователе от Spotify API
-            var accessToken = authenticateResult.Properties.GetTokenValue("access_token");
-            var userInfo = await GetSpotifyUserInfoAsync(accessToken);
+            var jwtToken = GenerateJwtToken();
 
-            // Обработка информации о пользователе
-            var newuser = new SpotifyRegDTO()
-            {
-                Country = userInfo.Country,
-                Email = userInfo.Email,
-                Username = userInfo.DisplayName
-            };
-
-            // Здесь вы можете добавить логику сохранения или обновления пользователя в вашей базе данных
-            var user = await service.Add(newuser);
-            // или создания JWT токена и отправки его клиенту
-
-            return Ok(user);
+            return Ok(new { Token = jwtToken });
         }
 
-        private async Task<SpotifyUser> GetSpotifyUserInfoAsync(string accessToken)
+        private async Task<string> ExchangeCodeForToken(string code)
         {
-            var client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var client = new RestClient("https://accounts.spotify.com/api/token");
+            RestRequest request = new RestRequest("POST");
+            var clientId = config["Spotify:CLIENT_ID"];
+            var clientSecret = config["Spotify:CLIENT_SECRET"];
+            var redirectUri = config["Spotify:REDIRECT_URI"];
+            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+            request.AddParameter("client_id", clientId);
+            request.AddParameter("client_secret", clientSecret);
+            request.AddParameter("grant_type", "authorization_code");
+            request.AddParameter("code", code);
+            request.AddParameter("redirect_uri", redirectUri);
 
-            var response = await client.GetAsync("https://api.spotify.com/v1/me");
-            response.EnsureSuccessStatusCode();
+            var response = await client.ExecuteAsync<TokenResponse>(request);
+            if (response.IsSuccessful)
+            {
+                return response.Data.AccessToken;
+            }
+            else
+            {
+                Console.WriteLine(response.ErrorMessage);
+                return null;
+            }
+        }
 
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<SpotifyUser>(responseStream);
+        //private async Task<string> ExchangeCodeForToken(string code)
+        //{
+        //    var clientId = config["Spotify:CLIENT_ID"];
+        //    var clientSecret = config["Spotify:CLIENT_SECRET"];
+        //    var redirectUri = config["Spotify:REDIRECT_URI"];
+
+        //    using (var httpClient = new HttpClient())
+        //    {
+        //        var requestBody = new List<KeyValuePair<string, string>>
+        //    {
+        //        new KeyValuePair<string, string>("client_id", clientId),
+        //        new KeyValuePair<string, string>("client_secret", clientSecret),
+        //        new KeyValuePair<string, string>("grant_type", "authorization_code"),
+        //        new KeyValuePair<string, string>("code", code),
+        //        new KeyValuePair<string, string>("redirect_uri", redirectUri)
+        //    };
+
+        //        var requestContent = new FormUrlEncodedContent(requestBody);
+        //        var response = await httpClient.PostAsync("https://accounts.spotify.com/api/token", requestContent);
+
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            var responseContent = await response.Content.ReadAsStringAsync();
+        //            var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responseContent);
+        //            var jopa = tokenResponse.ToString();
+        //            return tokenResponse.AccessToken;
+        //        }
+        //        else
+        //        {
+        //            // Handle error
+        //            Console.WriteLine($"Failed to retrieve access token: {response.StatusCode}");
+        //            return null;
+        //        }
+        //    }
+        //}
+
+        private string GenerateJwtToken()
+        {
+            var jwtSecretKey = config["Jwt:SECRET_KEY"];
+            var jwtIssuer = config["Jwt:ISSUER"];
+            var jwtAudience = config["Jwt:AUDIENCE"];
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: jwtIssuer,
+                audience: jwtAudience,
+                claims: new[] { new Claim("scope", "api_access") },
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private class TokenResponse
+        {
+            public string AccessToken { get; set; }
+            public string TokenType { get; set; }
+            public int ExpiresIn { get; set; }
+            public string RefreshToken { get; set; }
         }
     }
 }

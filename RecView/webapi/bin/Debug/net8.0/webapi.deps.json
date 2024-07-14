@@ -15,6 +15,7 @@
           "Microsoft.EntityFrameworkCore": "9.0.0-preview.5.24306.3",
           "Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite": "9.0.0-preview.5.24306.3",
           "Microsoft.Owin.Security.OAuth": "4.2.2",
+          "RestSharp": "111.4.0",
           "SpotifyAPI.Web": "7.1.1",
           "SpotifyAPI.Web.Auth": "7.1.1",
           "Swashbuckle.AspNetCore": "6.4.0"
@@ -547,6 +548,14 @@
           }
         }
       },
+      "RestSharp/111.4.0": {
+        "runtime": {
+          "lib/net8.0/RestSharp.dll": {
+            "assemblyVersion": "111.4.0.0",
+            "fileVersion": "111.4.0.0"
+          }
+        }
+      },
       "SpotifyAPI.Web/7.1.1": {
         "dependencies": {
           "Newtonsoft.Json": "13.0.3"
@@ -1023,6 +1032,13 @@
       "sha512": "sha512-OseTFniKmyp76mEzOBwIKGBRS5eMoYNkMKaMXOpxx9jv88+b6mh1rSaw43vjBOItNhaLFG3d0a20PfHyibH5sw==",
       "path": "owin/1.0.0",
       "hashPath": "owin.1.0.0.nupkg.sha512"
+    },
+    "RestSharp/111.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GcOIOyYYFm3oCFHbGBwGtDawC9yqvv6m7Ixyt+qeI+/UrPNyCJK31VOPRfEgj5M+3AfigSP6a8jZyFtBZxouTA==",
+      "path": "restsharp/111.4.0",
+      "hashPath": "restsharp.111.4.0.nupkg.sha512"
     },
     "SpotifyAPI.Web/7.1.1": {
       "type": "package",

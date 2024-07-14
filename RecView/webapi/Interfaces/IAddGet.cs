@@ -1,4 +1,4 @@
-﻿namespace webapi.Services
+﻿namespace webapi.Interfaces
 {
     public interface IAddGet
     {

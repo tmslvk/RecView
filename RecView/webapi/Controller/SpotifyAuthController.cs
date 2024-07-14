@@ -130,9 +130,9 @@ namespace webapi.Controller
 
         private string GenerateJwtToken()
         {
-            var jwtSecretKey = config["Jwt:SECRET_KEY"];
-            var jwtIssuer = config["Jwt:ISSUER"];
-            var jwtAudience = config["Jwt:AUDIENCE"];
+            var jwtSecretKey = config["JWT:SECRET_KEY"];
+            var jwtIssuer = config["JWT:ISSUER"];
+            var jwtAudience = config["JWT:AUDIENCE"];
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

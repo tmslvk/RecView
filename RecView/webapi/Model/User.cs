@@ -34,6 +34,9 @@ namespace webapi.Models
 
         [Required]
         public string Username { get; set; }
+        
+        public SpotifyUser? SpotifyUser { get; set; }
+        public int SpotifyUserId { get; set; }
 
         public Task ExecuteResultAsync(ActionContext context)
         {

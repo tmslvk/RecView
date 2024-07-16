@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using NetTopologySuite.Simplify;
 using Newtonsoft.Json;
 using RestSharp;
 using SpotifyAPI.Web;
@@ -38,14 +39,14 @@ namespace webapi.Controller
             var scopes = new List<string> { 
                 "user-read-private", 
                 "user-read-email", 
-                //"user-follow-read",
-                //"user-read-recently-played",  
-                //"user-top-read",
+                "user-follow-read",
+                "user-read-recently-played",  
+                "user-top-read",
             };
             var authorizeUrl = $"https://accounts.spotify.com/authorize" +
                 $"?client_id={config["Spotify:CLIENT_ID"]}" +
                 $"&response_type=code" +
-                $"&redirect_uri={Uri.EscapeDataString(config["Spotify:REDIRECT_URI"])}" +
+                $"&redirect_uri={Uri.EscapeDataString(config["Spotify:CALLBACK"])}" +
                 $"&scope={Uri.EscapeDataString(string.Join(" ", scopes))}";
 
             return Redirect(authorizeUrl);
@@ -54,14 +55,14 @@ namespace webapi.Controller
         [HttpGet("callback")]
         public async Task<IActionResult> Callback(string code)
         {
-            // Exchange the authorization code for an access token
             var token = await ExchangeCodeForToken(code);
             if (token == null)
             {
                 return BadRequest("Unable to retrieve access token.");
             }
+            var user = service.GetUserInfo(token);
 
-            var jwtToken = GenerateJwtToken();
+            var jwtToken = GenerateJwtToken(user.display_name, user.id, user.email, user.country);
 
             return Ok(new { Token = jwtToken });
         }
@@ -69,21 +70,26 @@ namespace webapi.Controller
         private async Task<string> ExchangeCodeForToken(string code)
         {
             var client = new RestClient("https://accounts.spotify.com/api/token");
-            RestRequest request = new RestRequest("POST");
+            RestRequest request = new RestRequest("", Method.Post);
             var clientId = config["Spotify:CLIENT_ID"];
             var clientSecret = config["Spotify:CLIENT_SECRET"];
             var redirectUri = config["Spotify:REDIRECT_URI"];
+            var callback = config["Spotify:CALLBACK"];
             request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
             request.AddParameter("client_id", clientId);
             request.AddParameter("client_secret", clientSecret);
             request.AddParameter("grant_type", "authorization_code");
             request.AddParameter("code", code);
-            request.AddParameter("redirect_uri", redirectUri);
+            request.AddParameter("redirect_uri", callback);
 
             var response = await client.ExecuteAsync<TokenResponse>(request);
             if (response.IsSuccessful)
             {
-                return response.Data.AccessToken;
+                
+                TokenResponse token = JsonConvert.DeserializeObject<TokenResponse>(response.Content.ToString());
+                var access = token.access_token;
+                
+                return access;
             }
             else
             {
@@ -92,55 +98,21 @@ namespace webapi.Controller
             }
         }
 
-        //private async Task<string> ExchangeCodeForToken(string code)
-        //{
-        //    var clientId = config["Spotify:CLIENT_ID"];
-        //    var clientSecret = config["Spotify:CLIENT_SECRET"];
-        //    var redirectUri = config["Spotify:REDIRECT_URI"];
-
-        //    using (var httpClient = new HttpClient())
-        //    {
-        //        var requestBody = new List<KeyValuePair<string, string>>
-        //    {
-        //        new KeyValuePair<string, string>("client_id", clientId),
-        //        new KeyValuePair<string, string>("client_secret", clientSecret),
-        //        new KeyValuePair<string, string>("grant_type", "authorization_code"),
-        //        new KeyValuePair<string, string>("code", code),
-        //        new KeyValuePair<string, string>("redirect_uri", redirectUri)
-        //    };
-
-        //        var requestContent = new FormUrlEncodedContent(requestBody);
-        //        var response = await httpClient.PostAsync("https://accounts.spotify.com/api/token", requestContent);
-
-        //        if (response.IsSuccessStatusCode)
-        //        {
-        //            var responseContent = await response.Content.ReadAsStringAsync();
-        //            var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responseContent);
-        //            var jopa = tokenResponse.ToString();
-        //            return tokenResponse.AccessToken;
-        //        }
-        //        else
-        //        {
-        //            // Handle error
-        //            Console.WriteLine($"Failed to retrieve access token: {response.StatusCode}");
-        //            return null;
-        //        }
-        //    }
-        //}
-
-        private string GenerateJwtToken()
+        private string GenerateJwtToken(string displayName, string id, string email, string country)
         {
-            var jwtSecretKey = config["JWT:SECRET_KEY"];
-            var jwtIssuer = config["JWT:ISSUER"];
-            var jwtAudience = config["JWT:AUDIENCE"];
-
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWT:SECRET_KEY"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, id),
+                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Country, country),
+                new Claim(ClaimTypes.Name, displayName)
+            };
             var token = new JwtSecurityToken(
-                issuer: jwtIssuer,
-                audience: jwtAudience,
-                claims: new[] { new Claim("scope", "api_access") },
+                issuer: config["JWT:ISSUER"],
+                audience: config["JWT:AUDIENCE"],
+                claims: claims,
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: credentials
             );
@@ -150,10 +122,10 @@ namespace webapi.Controller
 
         private class TokenResponse
         {
-            public string AccessToken { get; set; }
-            public string TokenType { get; set; }
-            public int ExpiresIn { get; set; }
-            public string RefreshToken { get; set; }
+            public string access_token { get; set; }
+            public string token_type { get; set; }
+            public int expires_in { get; set; }
+            public string refresh_token { get; set; }
         }
     }
 }

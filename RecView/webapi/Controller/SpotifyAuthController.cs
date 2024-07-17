@@ -25,11 +25,13 @@ namespace webapi.Controller
     public class SpotifyAuthController : ControllerBase
     {
         SpotifyUserService service;
+        UserService userService;
         IConfiguration config;
-        public SpotifyAuthController (SpotifyUserService spotifyUserService, IConfiguration configuration)
+        public SpotifyAuthController (SpotifyUserService spotifyUserService, IConfiguration configuration, UserService userService)
         {
             service = spotifyUserService;
             config = configuration;
+            this.userService = userService; 
         }
 
         [HttpGet("login")]
@@ -60,11 +62,24 @@ namespace webapi.Controller
             {
                 return BadRequest("Unable to retrieve access token.");
             }
-            var user = service.GetUserInfo(token);
+            var userInfo = service.GetUserInfo(token);
+            if (!service.IsUserExists(userInfo.id))
+            {
+                var spotifyUser = new SpotifyRegDTO()
+                {
+                    SpotifyId = userInfo.id,
+                    Country = userInfo.country,
+                    DisplayName = userInfo.display_name,
+                    Email = userInfo.email
+                };
 
-            var jwtToken = GenerateJwtToken(user.display_name, user.id, user.email, user.country);
+                await service.Add(spotifyUser);
+            }
+            
 
-            return Ok(new { Token = jwtToken });
+            var jwtToken = GenerateJwtToken(userInfo.display_name, userInfo.id, userInfo.email, userInfo.country);
+
+            return Ok(new { Token = userInfo });
         }
 
         private async Task<string> ExchangeCodeForToken(string code)

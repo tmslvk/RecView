@@ -28,7 +28,7 @@ namespace webapi
                 .WithOne(uo => uo.Author)
                 .HasForeignKey(uo => uo.UserId)
                 .IsRequired(false)
-                .OnDelete(DeleteBehavior.SetNull); ;
+                .OnDelete(DeleteBehavior.Cascade); ;
 
             //Artist-album one-to-many
             modelBuilder.Entity<Artist>()
@@ -67,7 +67,7 @@ namespace webapi
             .HasOne(u => u.SpotifyUser)
             .WithOne()
             .HasForeignKey<User>(u => u.SpotifyUserId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

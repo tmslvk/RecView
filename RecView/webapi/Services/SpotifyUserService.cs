@@ -19,14 +19,20 @@ namespace webapi.Services
             var user = new SpotifyUser()
             {
                 Country = spotifyDto.Country,
-                DisplayName = spotifyDto.Username,
+                DisplayName = spotifyDto.DisplayName,
                 Email = spotifyDto.Email,
+                SpotifyId = spotifyDto.SpotifyId,
             };
 
             
             await db.SpotifyUsers.AddAsync(user);
             await db.SaveChangesAsync();
             return user;
+        }
+
+        public bool IsUserExists(string spotifyId)
+        {
+            return db.SpotifyUsers.Any(su=>su.SpotifyId == spotifyId);
         }
 
         public SpotifyUserInfo GetUserInfo(string accessToken)

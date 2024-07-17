@@ -13,7 +13,7 @@ namespace webapi.Models
     public class User
     {
         public int Id { get; set; }
-        public List<UserOverview>? Overviews { get; set; } = null!;
+        public List<UserOverview?> Overviews { get; set; } = null!;
 
         [Required]
         public string Lastname { get; set; }
@@ -36,7 +36,7 @@ namespace webapi.Models
         public string Username { get; set; }
         
         public SpotifyUser? SpotifyUser { get; set; }
-        public int SpotifyUserId { get; set; }
+        public int? SpotifyUserId { get; set; }
 
         public Task ExecuteResultAsync(ActionContext context)
         {

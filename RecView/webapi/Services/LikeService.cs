@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using webapi.Interfaces;
 using webapi.Model;
 
 namespace webapi.Services

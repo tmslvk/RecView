@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using webapi;
+using webapi.Interfaces;
 using webapi.Models;
 using webapi.Services;
 
@@ -31,12 +32,18 @@ builder.Services.AddSwaggerGen();
 
 string connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connection));
+builder.Services.AddHttpClient("Spotify", client =>
+{
+    client.BaseAddress = new Uri("https://api.spotify.com/");
+});
+builder.Services.AddHttpClient<ISpotifyService, SpotifyService>();
 //dependency injection
 builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<LikeService>();
 builder.Services.AddTransient<UserOverviewService>();
 builder.Services.AddTransient<PublicationService>();
 builder.Services.AddTransient<SpotifyUserService>();
+builder.Services.AddTransient<SpotifyService>();
 builder.Services.AddAuthentication(
         CertificateAuthenticationDefaults.AuthenticationScheme)
         .AddCertificate();
@@ -94,10 +101,7 @@ builder.Services.AddAuthentication("SpotifyJwtBearer")
             }
         };
     });
-builder.Services.AddHttpClient("Spotify", client =>
-{
-    client.BaseAddress = new Uri("https://api.spotify.com/");
-});
+
 var app = builder.Build();
 app.UseRouting();
 app.UseCors(options =>

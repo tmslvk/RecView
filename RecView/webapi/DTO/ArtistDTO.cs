@@ -1,8 +1,9 @@
-﻿namespace webapi.Model
+﻿using webapi.Model;
+
+namespace webapi.DTO
 {
-    public class Artist
+    public class ArtistDTO
     {
-        public string Id { get; set; }
         public string Name { get; set; }
         public int Followers { get; set; }
         public List<Album> Albums { get; set; }

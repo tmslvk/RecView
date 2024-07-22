@@ -38,6 +38,7 @@ builder.Services.AddHttpClient("Spotify", client =>
 });
 builder.Services.AddHttpClient<ISpotifyService, SpotifyService>();
 //dependency injection
+builder.Services.AddMemoryCache();
 builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<LikeService>();
 builder.Services.AddTransient<UserOverviewService>();

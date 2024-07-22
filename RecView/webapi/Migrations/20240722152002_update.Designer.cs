@@ -12,7 +12,7 @@ using webapi;
 namespace webapi.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20240717151829_update")]
+    [Migration("20240722152002_update")]
     partial class update
     {
         /// <inheritdoc />
@@ -27,18 +27,16 @@ namespace webapi.Migrations
 
             modelBuilder.Entity("webapi.Model.Album", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ArtistId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
+                    b.Property<string>("AlbumType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ArtistId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime2");
@@ -56,18 +54,11 @@ namespace webapi.Migrations
 
             modelBuilder.Entity("webapi.Model.Artist", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Followers")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Foundation")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -86,6 +77,12 @@ namespace webapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AlbumId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ArtistId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -95,6 +92,10 @@ namespace webapi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AlbumId");
+
+                    b.HasIndex("ArtistId");
 
                     b.ToTable("Genres");
                 });
@@ -150,10 +151,15 @@ namespace webapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AlbumId")
-                        .HasColumnType("int");
+                    b.Property<string>("AlbumId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Duration")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SpotifyId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -205,8 +211,9 @@ namespace webapi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AlbumId")
-                        .HasColumnType("int");
+                    b.Property<string>("AlbumId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -292,6 +299,17 @@ namespace webapi.Migrations
                     b.Navigation("Artist");
                 });
 
+            modelBuilder.Entity("webapi.Model.Genre", b =>
+                {
+                    b.HasOne("webapi.Model.Album", null)
+                        .WithMany("Genres")
+                        .HasForeignKey("AlbumId");
+
+                    b.HasOne("webapi.Model.Artist", null)
+                        .WithMany("Genres")
+                        .HasForeignKey("ArtistId");
+                });
+
             modelBuilder.Entity("webapi.Model.Like", b =>
                 {
                     b.HasOne("webapi.Models.User", "User")
@@ -346,7 +364,7 @@ namespace webapi.Migrations
             modelBuilder.Entity("webapi.Models.User", b =>
                 {
                     b.HasOne("webapi.Model.SpotifyUser", "SpotifyUser")
-                        .WithOne()
+                        .WithOne("User")
                         .HasForeignKey("webapi.Models.User", "SpotifyUserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
@@ -355,6 +373,8 @@ namespace webapi.Migrations
 
             modelBuilder.Entity("webapi.Model.Album", b =>
                 {
+                    b.Navigation("Genres");
+
                     b.Navigation("Songs");
 
                     b.Navigation("UserOverviews");
@@ -363,6 +383,13 @@ namespace webapi.Migrations
             modelBuilder.Entity("webapi.Model.Artist", b =>
                 {
                     b.Navigation("Albums");
+
+                    b.Navigation("Genres");
+                });
+
+            modelBuilder.Entity("webapi.Model.SpotifyUser", b =>
+                {
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("webapi.Models.User", b =>

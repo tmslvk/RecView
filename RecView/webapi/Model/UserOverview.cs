@@ -11,7 +11,7 @@ namespace webapi.Model
         public User Author { get; set; }
         public Album OverviewedAlbum { get; set; }
         public int UserId { get; set; }
-        public int AlbumId { get; set; }
+        public string AlbumId { get; set; }
         public uint Rating { get; set; }
     }
 }

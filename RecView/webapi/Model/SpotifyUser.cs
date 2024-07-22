@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using webapi.Models;
 
 namespace webapi.Model
 {
@@ -9,5 +10,6 @@ namespace webapi.Model
         public string Email { get; set; }
         public string Country { get; set; }
         public string SpotifyId { get; set; }
+        public User? User { get; set; }
     }
 }

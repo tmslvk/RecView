@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using NetTopologySuite.Simplify;
 using Newtonsoft.Json;
@@ -27,11 +28,13 @@ namespace webapi.Controller
         SpotifyUserService service;
         UserService userService;
         IConfiguration config;
-        public SpotifyAuthController (SpotifyUserService spotifyUserService, IConfiguration configuration, UserService userService)
+        private readonly IMemoryCache memoryCache;
+        public SpotifyAuthController (SpotifyUserService spotifyUserService, IConfiguration configuration, UserService userService, IMemoryCache memoryCache)
         {
             service = spotifyUserService;
             config = configuration;
             this.userService = userService; 
+            this.memoryCache = memoryCache;
         }
 
         [HttpGet("login")]
@@ -63,6 +66,8 @@ namespace webapi.Controller
                 return BadRequest("Unable to retrieve access token.");
             }
             var userInfo = service.GetUserInfo(token);
+
+            memoryCache.Set("SpotifyAccessToken", token, DateTime.UtcNow.AddHours(1));
             if (!service.IsUserExists(userInfo.id))
             {
                 var spotifyUser = new SpotifyRegDTO()
@@ -79,7 +84,7 @@ namespace webapi.Controller
 
             var jwtToken = GenerateJwtToken(userInfo.display_name, userInfo.id, userInfo.email, userInfo.country);
 
-            return Ok(new { Token = userInfo });
+            return Ok(new { Token = jwtToken });
         }
 
         private async Task<string> ExchangeCodeForToken(string code)
@@ -103,8 +108,53 @@ namespace webapi.Controller
                 
                 TokenResponse token = JsonConvert.DeserializeObject<TokenResponse>(response.Content.ToString());
                 var access = token.access_token;
+                memoryCache.Set("SpotifyRefreshToken", token.refresh_token, DateTime.UtcNow.AddDays(60));
                 
                 return access;
+            }
+            else
+            {
+                Console.WriteLine(response.ErrorMessage);
+                return null;
+            }
+        }
+
+        [HttpGet("refresh")]
+        public async Task<IActionResult> RefreshAccessToken()
+        {
+            // Проверяем наличие access token в кеше
+            if (!memoryCache.TryGetValue("SpotifyRefreshToken", out string accessToken))
+            {
+                return BadRequest("Отсутствует access token. Пользователь должен сначала авторизоваться.");
+            }
+
+            var refreshedToken = await ExchangeRefreshTokenForAccessToken(accessToken);
+            if (refreshedToken == null)
+            {
+                return BadRequest("Не удалось обновить access token.");
+            }
+
+            // Обновляем access token в кеше
+            
+
+            return Ok(new { AccessToken = refreshedToken.access_token });
+        }
+        private async Task<TokenResponse> ExchangeRefreshTokenForAccessToken(string refreshToken)
+        {
+            var client = new RestClient("https://accounts.spotify.com/api/token");
+            var request = new RestRequest("", Method.Post);
+            var clientId = config["Spotify:CLIENT_ID"];
+            var clientSecret = config["Spotify:CLIENT_SECRET"];
+            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+            request.AddParameter("client_id", clientId);
+            request.AddParameter("client_secret", clientSecret);
+            request.AddParameter("grant_type", "refresh_token");
+            request.AddParameter("refresh_token", refreshToken);
+
+            var response = await client.ExecuteAsync<TokenResponse>(request);
+            if (response.IsSuccessful)
+            {
+                return JsonConvert.DeserializeObject<TokenResponse>(response.Content);
             }
             else
             {

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using SpotifyAPI.Web;
 using webapi.DTO;
 using webapi.Model;
 using webapi.Services;
@@ -110,7 +111,7 @@ namespace webapi.Controller
         [HttpPost("artists/{artistId}/add")]
         public async Task<ActionResult<Album>> AddToDB(Artist artist)
         {
-            var newArtist = _albumService.Add(artist.Id);
+            var newArtist = _artistService.Add(artist.Id);
             if(newArtist != null)
             {
                 return Created("", newArtist);

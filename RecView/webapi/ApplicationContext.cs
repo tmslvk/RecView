@@ -65,7 +65,7 @@ namespace webapi
             //User-SpotifyUser
             modelBuilder.Entity<User>()
             .HasOne(u => u.SpotifyUser)
-            .WithOne()
+            .WithOne(su => su.User)
             .HasForeignKey<User>(u => u.SpotifyUserId)
             .OnDelete(DeleteBehavior.Cascade);
         }

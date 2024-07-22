@@ -42,12 +42,12 @@ namespace webapi.Services
             return await db.UserOverviews.Where(uo=>uo.UserId == userId).ToListAsync();
         }
 
-        public async Task<List<UserOverview>?> GetByAlbum(int albumId)
+        public async Task<List<UserOverview>?> GetByAlbum(string albumId)
         {
             return await db.UserOverviews.Where(uo=>uo.AlbumId == albumId).ToListAsync();
         }
 
-        public async Task<List<UserOverview>?> GetByArtist(int artistId)
+        public async Task<List<UserOverview>?> GetByArtist(string artistId)
         {
             return await db.UserOverviews.Where(uo => uo.OverviewedAlbum.ArtistId == artistId).ToListAsync();
         }

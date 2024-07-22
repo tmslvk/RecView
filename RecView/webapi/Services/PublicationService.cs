@@ -43,7 +43,7 @@ namespace webapi.Services
             return await db.Publications.Where(p => p.UserOverview.UserId == userId).OrderByDescending(p => p.LikesCount).ToListAsync();
         }
 
-        public async Task<List<Publication>?> GetByAlbum(int albumId)
+        public async Task<List<Publication>?> GetByAlbum(string albumId)
         {
             return await db.Publications.Where(p => p.UserOverview.AlbumId == albumId).ToListAsync();
         }
@@ -53,7 +53,7 @@ namespace webapi.Services
             return await db.Publications.OrderByDescending(p=>p.UserOverview.Rating).ToListAsync();
         }
 
-        public async Task<List<Publication>?> GetByOverall(int albumId)
+        public async Task<List<Publication>?> GetByOverall(string albumId)
         {
             return await db.Publications.Where(p=>p.UserOverview.AlbumId == albumId).OrderByDescending(p => p.UserOverview.Rating).ToListAsync();
         }

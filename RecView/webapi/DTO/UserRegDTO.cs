@@ -12,5 +12,6 @@ namespace webapi.DTO
         public string Password { get; set; }
         public string Country { get; set; }
         public string Username { get; set; }
+        public string SpotifyId { get; set; }
     }
 }

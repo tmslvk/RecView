@@ -1,5 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginForm from './components/LoginForm.vue'
+import MainPage from './components/MainPage.vue'
+import SpotifyCallback from './components/SpotifyCallback.vue'
+import RegistrationSpotifyAdditional from './components/RegistrationSpotifyAdditional.vue'
+import { toHandlerKey } from 'vue'
 
 const router = createRouter({
     linkActiveClass: 'is-active',
@@ -10,13 +14,29 @@ const router = createRouter({
             name: 'Login',
             component: LoginForm,
         },
+        {
+            path: '/MainPage',
+            name: 'MainPage',
+            component: MainPage,
+        },
+        {
+            path: '/callback',
+            name: 'SpotifyCallback',
+            component: SpotifyCallback
+        },
+        {
+            path: '/register',
+            name: 'RegistrationSpotify',
+            component: RegistrationSpotifyAdditional
+        }
+
     ]
 })
 
 router.beforeEach(async (to, from) => {
     if (
         !localStorage.getItem("token") &&
-        to.name !== 'Login' && to.name !== 'Registration'
+        to.name !== 'Login' && to.name !== 'SpotifyCallback' && to.name !== 'RegistrationSpotify'
     ) {
         return { name: 'Login' }
     }

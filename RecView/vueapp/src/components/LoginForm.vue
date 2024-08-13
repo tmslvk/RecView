@@ -52,6 +52,15 @@
               >Sign up</router-link>
             </div>
           </div>
+          <button
+            class="button is-primary"
+            @click="loginSpotify"
+          >
+            <span class="icon">
+              <i class="fab fa-spotify"></i>
+            </span>
+            <span>Log In through Spotify</span>
+          </button>
         </div>
       </div>
     </div>
@@ -60,14 +69,9 @@
   
   <script>
 import axios from "axios";
-import RegisterDialogue from "./RegisterDialogue.vue";
-import RegisterForm from "./RegisterForm.vue";
 
 export default {
-  components: {
-    RegisterDialogue,
-    RegisterForm,
-  },
+  components: {},
   data() {
     return {
       errorVisible: false,
@@ -85,13 +89,10 @@ export default {
   },
 
   methods: {
-    showDialog() {
-      this.dialogVisible = true;
-    },
     async login() {
       const data = this.user;
       const response = await axios
-        .post("https://localhost:7234/api/auth/login", data, {
+        .post("https://localhost:7154/api/Auth/login", data, {
           headers: { "Content-Type": "application/json", accept: "text/plain" },
         })
         .catch((e) => console.log(e));
@@ -101,12 +102,25 @@ export default {
 
       this.$router.push("/MainPage");
     },
+    async loginSpotify() {
+      try {
+        // Redirect to Spotify's login page
+        window.location.href = "https://localhost:7154/api/SpotifyAuth/login";
+
+        //this.store.dispatch("handleSpotifyCallback");
+      } catch (error) {
+        console.error(
+          "Error occurred while logging in through Spotify:",
+          error
+        );
+      }
+    },
   },
 };
 </script>
   
   <style scoped>
 .card {
-  padding: 1rem;
+  padding: 3rem;
 }
 </style>

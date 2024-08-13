@@ -43,7 +43,6 @@ builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<LikeService>();
 builder.Services.AddTransient<UserOverviewService>();
 builder.Services.AddTransient<PublicationService>();
-builder.Services.AddTransient<SpotifyUserService>();
 builder.Services.AddTransient<SpotifyService>();
 builder.Services.AddAuthentication(
         CertificateAuthenticationDefaults.AuthenticationScheme)

@@ -19,17 +19,15 @@ namespace webapi.Controller
     public class ProfileController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        SpotifyUserService _spotifyUserService;
         UserService _userService;
         UserOverviewService _userOverviewService;
         SpotifyService _spotifyService;
         AlbumService _albumService;
         ArtistService _artistService;
 
-        public ProfileController(IConfiguration configuration, SpotifyUserService spotifyUserService, UserService userService, UserOverviewService userOverviewService, SpotifyService spotifyService, AlbumService albumService, ArtistService artistService)
+        public ProfileController(IConfiguration configuration, UserService userService, UserOverviewService userOverviewService, SpotifyService spotifyService, AlbumService albumService, ArtistService artistService)
         {
             _configuration = configuration;
-            _spotifyUserService = spotifyUserService;
             _userService = userService;
             _userOverviewService = userOverviewService;
             _spotifyService = spotifyService;

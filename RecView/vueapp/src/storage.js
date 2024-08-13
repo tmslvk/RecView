@@ -14,56 +14,60 @@ export const store = createStore({
         setAccessToken(state, token) {
             state.accessToken = token;
         }
-
     },
     actions: {
         async setUser({ commit }) {
             try {
                 const token = localStorage.getItem("token");
-                if (token == null) {
-                    console.log(null);
+                if (!token) {
                     commit("setUser", null);
                     return;
                 }
+
+                // Optional: Ensure that you are using the correct token type
                 const { data: user } = await axios.get(
-                    "https://localhost:7154/api/auth/me",
+                    "https://localhost:7154/api/Auth/me",
                     {
                         headers: {
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                            Authorization: `Bearer ${token}`,
                         },
                     }
                 );
-                console.log(user);
                 commit("setUser", user);
             } catch (e) {
-                console.log(e);
+                console.error(e);
+                commit("setUser", null); // Optional: Clear user if there's an error
             }
         },
-        async loginSpotify({ commit }) {
-            try {
-                const response = await axios.get("https://localhost:7154/api/SpotifyAuth/login");
-                if (response == null) {
-                    console.log(null);
-                    commit("setAccessToken", null);
-                    return;
-                }
-                const { data: user } = await axios.get(
-                    "https://localhost:7234/api/auth/me",
-                    {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
-                        },
-                    }
-                );
-                console.log(user);
-                commit("setUser", user);
+        async login() {
 
+        },
+        async handleSpotifyCallback({ dispatch }) {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const code = urlParams.get("code");
+
+                if (!code) {
+                    throw new Error("Authorization code not found.");
+                }
+
+                const { data } = await axios.get(`https://localhost:7154/api/SpotifyAuth/callback?code=${code}`);
+                const { Token } = data;
+
+                localStorage.setItem("token", Token);
+                await dispatch('setUser');
+
+                router.push({ path: '/RegistrationSpotify' });
             } catch (error) {
-                console.error("Ошибка при попытке входа через Spotify:", error);
+                console.error("Error occurred during Spotify callback handling:", error);
             }
         },
         async logout({ commit }) {
+            // Clear token from storage
+            localStorage.removeItem("token");
             commit("setUser", null);
+            // Optionally redirect to login or home page
+            router.push({ path: '/Login' });
         },
     },
 });

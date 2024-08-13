@@ -15,7 +15,6 @@ namespace webapi
         public DbSet<Song> Songs { get; set; } = null!;
         public DbSet<UserOverview> UserOverviews { get; set; } = null!;
         public DbSet<Like> Likes { get; set; } = null!;
-        public DbSet<SpotifyUser> SpotifyUsers { get; set; }
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
             Database.EnsureCreated();
@@ -61,13 +60,6 @@ namespace webapi
             //Like
             modelBuilder.Entity<Like>()
                 .HasKey(l => l.Id);
-
-            //User-SpotifyUser
-            modelBuilder.Entity<User>()
-            .HasOne(u => u.SpotifyUser)
-            .WithOne(su => su.User)
-            .HasForeignKey<User>(u => u.SpotifyUserId)
-            .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace webapi.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FeedController : ControllerBase
+    public class BrowseController : ControllerBase
     {
 
     }

@@ -72,16 +72,19 @@ namespace webapi.Controller
                 var refreshToken = tokenResponse.refresh_token;
 
                 var userInfo = await userService.GetUserInfo(accessToken);
-
                 memoryCache.Set("SpotifyAccessToken", accessToken, DateTime.UtcNow.AddHours(1));
                 memoryCache.Set("SpotifyRefreshToken", refreshToken, DateTime.UtcNow.AddHours(1));
-                
-                var jwtToken = GenerateJwtToken(userInfo.display_name, userInfo.id, userInfo.email, userInfo.country);
-                if (!await userService.IsUserExists(userInfo.id))
+
+                var user = await userService.GetUserBySpotifyId(userInfo.id);
+                if (user == null)
                 {
                     var url = $"https://localhost:5173/register?userId={userInfo.id}&displayName={Uri.EscapeDataString(userInfo.display_name)}&email={Uri.EscapeDataString(userInfo.email)}&country={Uri.EscapeDataString(userInfo.country)}";
                     return Redirect(url);
                 }
+                
+
+                var jwtToken = GenerateJwtToken(userInfo.display_name, user.Id.ToString(), userInfo.email, userInfo.country);
+                
 
                 return RedirectToAction("RedirectToClient", new { token = jwtToken });
 
@@ -110,12 +113,11 @@ namespace webapi.Controller
                 {
                     return NoContent();
                 }
-                await userService.Add(userRegDTO);
+                var user = await userService.Add(userRegDTO);
 
-                var token = GenerateJwtToken(userRegDTO.Username, userRegDTO.SpotifyId, userRegDTO.Email, userRegDTO.Country);
-                var redirectUrl = $"https://localhost:5173/callback";
+                var token = GenerateJwtToken(userRegDTO.Username, user.Id.ToString(), userRegDTO.Email, userRegDTO.Country);
                 memoryCache.Set("JWTToken", token, DateTime.UtcNow.AddHours(1));
-                return Created(redirectUrl, token);
+                return Created("", token);
             }
             catch (Exception ex)
             {

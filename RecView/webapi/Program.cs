@@ -48,8 +48,8 @@ builder.Services.AddAuthentication(
         CertificateAuthenticationDefaults.AuthenticationScheme)
         .AddCertificate();
 //through server
-builder.Services.AddAuthentication("ApplicationJwtBearer")
-    .AddJwtBearer("ApplicationJwtBearer", options =>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -62,45 +62,44 @@ builder.Services.AddAuthentication("ApplicationJwtBearer")
             ValidateIssuerSigningKey = true,
         };
     });
-
 //through spotify
-builder.Services.AddAuthentication("SpotifyJwtBearer")
-    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-    {
-        // Конфигурация JWT Bearer
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JWT:ISSUER"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["JWT:AUDIENCE"],
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SECRET_KEY"]))
-        };
-    })
-    .AddOAuth("Spotify", options =>
-    {
-        options.ClientId = builder.Configuration["Spotify:CLIENT_ID"];
-        options.ClientSecret = builder.Configuration["Spotify:CLIENT_SECRET"];
-        options.CallbackPath = "/signin-spotify"; // Путь, на который Spotify отправит ответ после аутентификации
-        options.AuthorizationEndpoint = "https://accounts.spotify.com/authorize";
-        options.TokenEndpoint = "https://accounts.spotify.com/api/token";
+//builder.Services.AddAuthentication("SpotifyJwtBearer")
+//    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+//    {
+//        // Конфигурация JWT Bearer
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidIssuer = builder.Configuration["JWT:ISSUER"],
+//            ValidateAudience = true,
+//            ValidAudience = builder.Configuration["JWT:AUDIENCE"],
+//            ValidateLifetime = true,
+//            ValidateIssuerSigningKey = true,
+//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SECRET_KEY"]))
+//        };
+//    })
+//    .AddOAuth("Spotify", options =>
+//    {
+//        options.ClientId = builder.Configuration["Spotify:CLIENT_ID"];
+//        options.ClientSecret = builder.Configuration["Spotify:CLIENT_SECRET"];
+//        options.CallbackPath = "/signin-spotify"; // Путь, на который Spotify отправит ответ после аутентификации
+//        options.AuthorizationEndpoint = "https://accounts.spotify.com/authorize";
+//        options.TokenEndpoint = "https://accounts.spotify.com/api/token";
 
-        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "display_name");
-        options.ClaimActions.MapJsonKey("urn:spotify:country", "country");
+//        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+//        options.ClaimActions.MapJsonKey(ClaimTypes.Name, "display_name");
+//        options.ClaimActions.MapJsonKey("urn:spotify:country", "country");
 
-        options.Events = new OAuthEvents
-        {
-            OnCreatingTicket = context =>
-            {
-                var accessToken = context.AccessToken;
-                // Дополнительная обработка токена, если необходимо
-                return Task.CompletedTask;
-            }
-        };
-    });
+//        options.Events = new OAuthEvents
+//        {
+//            OnCreatingTicket = context =>
+//            {
+//                var accessToken = context.AccessToken;
+//                // Дополнительная обработка токена, если необходимо
+//                return Task.CompletedTask;
+//            }
+//        };
+//    });
 
 var app = builder.Build();
 app.UseRouting();

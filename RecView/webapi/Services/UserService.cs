@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using RestSharp;
 using SpotifyAPI.Web;
+using System.Runtime.ExceptionServices;
 using webapi.DTO;
 using webapi.Models;
 
@@ -60,6 +61,11 @@ namespace webapi.Services
             }
             db.Entry(user);
             return user;
+        }
+
+        public async Task<User?> GetUserBySpotifyId(string spotifyId)
+        {
+            return await db.Users.FirstOrDefaultAsync(u => u.SpotifyUserId == spotifyId);
         }
 
         public async Task<User?> GetOne(int id)

@@ -92,17 +92,38 @@ export default {
   methods: {
     async login() {
       const data = this.user;
-      const response = await axios
-        .post("https://localhost:7154/api/Auth/login", data, {
-          headers: { "Content-Type": "application/json", accept: "text/plain" },
-        })
-        .catch((e) => console.log(e));
-      localStorage.setItem("token", response.data);
+      console.log(data);
+      try {
+        // Выполнение запроса с помощью Axios
+        const response = await axios.post(
+          "https://localhost:7154/api/Auth/login",
+          data,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              accept: "text/plain",
+            },
+          }
+        );
 
-      this.$store.dispatch("setUser");
+        console.log(response);
+        if (response && response.data) {
+          localStorage.setItem("token", response.data.token); // Предполагаем, что сервер возвращает объект с токеном
 
-      this.$router.push("/MainPage");
+          // Обновление состояния пользователя в Vuex
+          await this.$store.dispatch("setUser");
+
+          // Перенаправление на страницу
+          this.$router.push("/MainPage");
+        } else {
+          console.error("Response does not contain data:", response);
+        }
+      } catch (error) {
+        console.error("Login failed:", error);
+        // Дополнительные действия при ошибке (например, показать сообщение об ошибке)
+      }
     },
+
     async loginSpotify() {
       try {
         // Redirect to Spotify's login page

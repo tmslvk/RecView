@@ -24,7 +24,6 @@ export const store = createStore({
                     return;
                 }
 
-                // Optional: Ensure that you are using the correct token type
                 const { data: user } = await axios.get(
                     "https://localhost:7154/api/Auth/me",
                     {
@@ -36,11 +35,8 @@ export const store = createStore({
                 commit("setUser", user);
             } catch (e) {
                 console.error(e);
-                commit("setUser", null); // Optional: Clear user if there's an error
+                commit("setUser", null);
             }
-        },
-        async login() {
-
         },
         async handleSpotifyCallback({ dispatch }) {
             try {

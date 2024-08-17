@@ -12,11 +12,13 @@
 <script>
 import { mapState } from "vuex";
 import LoginForm from "./components/LoginForm.vue";
+import Navbar from "./components/Navbar.vue";
 
 export default {
   computed: mapState(["user"]),
   components: {
     LoginForm,
+    Navbar,
   },
   mounted() {
     setTimeout(() => {

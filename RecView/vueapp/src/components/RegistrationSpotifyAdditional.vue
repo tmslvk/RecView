@@ -139,7 +139,7 @@ export default {
             }
           );
           console.log(response);
-          const { token } = response.data; // Извлечение токена из ответа
+          const token = response.data; // Извлечение токена из ответа
           localStorage.setItem("token", token);
           // Для использования Vuex и Vue Router
           store.dispatch("setUser");
@@ -147,7 +147,7 @@ export default {
         }
       } catch (e) {
         console.error(e);
-        aalert(`Error: ${e.message}`);
+        alert(`Error: ${e.message}`);
       }
     };
 

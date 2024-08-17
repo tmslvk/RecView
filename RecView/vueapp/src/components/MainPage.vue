@@ -1,8 +1,10 @@
 <template>
   <div>
-    <h1>Grats...</h1>
+    <div class="mainpage">
+    </div>
   </div>
 </template>
 
-<script setup>
+<script>
+export default {};
 </script>

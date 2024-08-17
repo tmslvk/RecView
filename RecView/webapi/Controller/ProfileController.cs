@@ -27,7 +27,7 @@ namespace webapi.Controller
 
         public ProfileController(IConfiguration configuration, UserService userService, UserOverviewService userOverviewService, SpotifyService spotifyService, AlbumService albumService, ArtistService artistService)
         {
-            _configuration = configuration;
+            _configuration = configuration; 
             _userService = userService;
             _userOverviewService = userOverviewService;
             _spotifyService = spotifyService;

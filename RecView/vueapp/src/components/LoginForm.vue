@@ -48,7 +48,7 @@
               noSignUp">
               Don't have an account yet? <router-link
                 class="button is-info is-inverted is-small"
-                to="/Registration"
+                to="/Signup"
               >Sign up</router-link>
             </div>
           </div>
@@ -69,9 +69,10 @@
   
   <script>
 import axios from "axios";
+import Registration from "./SignUp.vue";
 
 export default {
-  components: {},
+  components: { Registration },
   data() {
     return {
       errorVisible: false,

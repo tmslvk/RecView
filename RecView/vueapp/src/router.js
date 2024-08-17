@@ -3,7 +3,7 @@ import LoginForm from './components/LoginForm.vue'
 import MainPage from './components/MainPage.vue'
 import SpotifyCallback from './components/SpotifyCallback.vue'
 import RegistrationSpotifyAdditional from './components/RegistrationSpotifyAdditional.vue'
-import { toHandlerKey } from 'vue'
+import Signup from './components/SignUp.vue'
 
 const router = createRouter({
     linkActiveClass: 'is-active',
@@ -28,6 +28,11 @@ const router = createRouter({
             path: '/register',
             name: 'RegistrationSpotify',
             component: RegistrationSpotifyAdditional
+        },
+        {
+            path: '/Signup',
+            name: 'Signup',
+            component: Signup,
         }
 
     ]
@@ -36,7 +41,7 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
     if (
         !localStorage.getItem("token") &&
-        to.name !== 'Login' && to.name !== 'SpotifyCallback' && to.name !== 'RegistrationSpotify'
+        to.name !== 'Login' && to.name !== 'SpotifyCallback' && to.name !== 'RegistrationSpotify' && to.name !== 'Signup'
     ) {
         return { name: 'Login' }
     }

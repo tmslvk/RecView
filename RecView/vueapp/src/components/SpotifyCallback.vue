@@ -23,7 +23,7 @@ export default {
 
     this.$store.dispatch("setUser");
 
-    this.$router.push("/RegistrationSpotify");
+    this.$router.push("/MainPage");
   },
 
   name: "SpotifyCallback",

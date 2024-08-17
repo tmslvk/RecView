@@ -33,6 +33,10 @@ namespace webapi.Controller
             {
                 return BadRequest("This user already exists");
             }
+            else if(await service.CheckEmail(request.Email))
+            {
+                return BadRequest("Email is already in use");
+            }
 
             var user = await service.Add(request);
             var token = this.CreateToken((User)user);
@@ -94,24 +98,24 @@ namespace webapi.Controller
 
         private string CreateToken(User user)
         {
-            List<Claim> claims = new List<Claim>
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SECRET_KEY"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            List<Claim> claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Country, user.Country.ToString() ?? "")
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Country, user.Country),
+                new Claim(ClaimTypes.Name, user.Username)
             };
-
             var token = new JwtSecurityToken(
+                issuer: _configuration["JWT:ISSUER"],
+                audience: _configuration["JWT:AUDIENCE"],
                 claims: claims,
-                expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(30)),
-                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256),
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: credentials
+            );
 
-                issuer: AuthOptions.ISSUER,
-                audience: AuthOptions.AUDIENCE
-                ); ;
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return jwt;
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
         #endregion
     }

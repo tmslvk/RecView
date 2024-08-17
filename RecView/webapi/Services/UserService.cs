@@ -24,15 +24,21 @@ namespace webapi.Services
 
         public async Task<User> Add(UserRegDTO userDTO)
         {
+            var spotifyId = userDTO.SpotifyId;
+            if (userDTO.SpotifyId == "" || userDTO.SpotifyId == string.Empty)
+            {
+                spotifyId = null;
+            }
+            
             var user = new User()
             {
                 Lastname = userDTO.Lastname,
                 Firstname = userDTO.Firstname,
                 Email = userDTO.Email,
-                Password = userDTO.Password,
+                Password = BCrypt.Net.BCrypt.HashPassword(userDTO.Password),
                 Country = userDTO.Country,
                 Username = userDTO.Username,
-                SpotifyUserId = userDTO.SpotifyId
+                SpotifyUserId = spotifyId
             };
             await db.AddAsync(user);
             await db.SaveChangesAsync();
@@ -75,6 +81,12 @@ namespace webapi.Services
             var user = await db.Users.FirstOrDefaultAsync(u => u.Username == username);
             return user != null;
         }
+        public async Task<bool> CheckEmail(string email)
+        {
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return user != null;
+        }
+
         public async Task<SpotifyUserInfo> GetUserInfo(string accessToken)
         {
             // Получение информации о пользователе Spotify
